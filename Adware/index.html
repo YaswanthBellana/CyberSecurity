@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Advertisement Image</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>View the secret images</h1>
+
+        <div class="images-section" id="imagesSection">
+            <h2>Uploaded Images:</h2>
+            <div id="imageContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        function loadImages() {
+            fetch('http://localhost:3000/images')
+                .then(response => response.json())
+                .then(data => {
+                    const imageContainer = document.getElementById('imageContainer');
+                    imageContainer.innerHTML = '';
+                    
+                    data.images.forEach(imagePath => {
+                        const imgElement = document.createElement('div');
+                        imgElement.classList.add('image-container');
+                        
+                        const img = document.createElement('img');
+                        img.src = 'http://localhost:3000' + imagePath;
+                        img.alt = 'Uploaded Image';
+                        img.classList.add('image');
+                        imgElement.appendChild(img);
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = '×';
+                        deleteBtn.classList.add('delete-btn');
+                        deleteBtn.onclick = function() {
+                            deleteImage(imagePath);
+                        };
+                        imgElement.appendChild(deleteBtn);
+                        
+                        imageContainer.appendChild(imgElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading images:', error);
+                });
+        }
+
+        function deleteImage(imagePath) {
+            const imageName = imagePath.split('/').pop();
+            fetch('http://localhost:3000/delete/' + imageName, {
+                method: 'DELETE'
+            })
+            .then(response => response.text())
+            .then(() => {
+                loadImages();
+            })
+            .catch(error => {
+                console.error('Error deleting image:', error);
+            });
+        }
+
+        window.onload = loadImages;
+    </script>
+
+</body>
+</html>
